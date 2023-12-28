@@ -1,14 +1,51 @@
 import requests
+from bs4 import BeautifulSoup
+
+def scrape_stock(stock_symbol):
+    url = f'https://www.google.com/search?q={stock_symbol}+stock+price'
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    price_tag = soup.find('div', class_='BNeawe iBp4i AP7Wnd')
+
+    if price_tag:
+        price_text = price_tag.text.strip()
+        parts = price_text.split()
+        if len(parts) >= 3:
+            price = parts[0]
+            change, percent_change = parts[1], parts[2]
+            return {
+                'price': price,
+                'change': change,
+                'percent_change': percent_change.strip('()')
+            }
+        else:
+            print(f"Unexpected format for stock price data: {price_text}")
+            return None
+    else:
+        print(f"Could not find stock price for {stock_symbol}")
+        return None
+
+
 
 def fetch_stock_prices(allocations):
-    prices = {}
+    stock_data = {}
     for stock in allocations.keys():
-        url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={stock}&apikey=0'
-        response = requests.get(url)
-        data = response.json()
-        price = data["Global Quote"]["05. price"]
-        prices[stock] = float(price)
-    return prices
+        data = scrape_stock(stock)
+        if data:
+            try:
+                stock_data[stock] = {
+                    'price': float(data['price'].replace(',', '')),
+                    'change': data['change'],
+                    'percent_change': data['percent_change']
+                }
+            except ValueError:
+                print(f"Error parsing data for {stock}: {data}")
+        else:
+            stock_data[stock] = None
+    return stock_data
+
 
 def calculate_investment(allocations, total_investment):
     investment_per_stock = {}

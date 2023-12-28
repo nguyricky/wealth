@@ -1,6 +1,7 @@
 from questionary import select, Style
-from data import load_or_create_allocations, edit_allocations  # Import the edit_allocations function
+from data import load_or_create_allocations, edit_allocations
 from utils import calculate_investment, fetch_stock_prices
+from tabulate import tabulate
 
 custom_style = Style([
     ('qmark', ''),
@@ -26,15 +27,24 @@ def main_menu():
         if choice == 'Calculate Investment':
             total_investment = float(input("Enter the investment amount: "))
             investment_per_stock = calculate_investment(allocations, total_investment)
+
+            table_data = [[stock, f"${amount:.2f}"] for stock, amount in investment_per_stock.items()]
+
             print("\nInvestment Allocation:")
-            for stock, amount in investment_per_stock.items():
-                print(f"{stock}: ${amount:.2f}")
+            print(tabulate(table_data, headers=["Stock", "Investment Amount"]))
             print("\n")
         elif choice == 'Fetch Portfolio Stock Prices':
-            prices = fetch_stock_prices(allocations)
-            print("\nCurrent Tracked Stock Prices:")
-            for stock, price in prices.items():
-                print(f"{stock}: ${price:.2f}")
+            stock_data = fetch_stock_prices(allocations)
+            table_data = []
+
+            for stock, data in stock_data.items():
+                if data:
+                    table_data.append([stock, f"${data['price']}", data['change'], data['percent_change']])
+                else:
+                    table_data.append([stock, "N/A", "N/A", "N/A"])
+
+            print("\nCurrent Tracked Stock Prices:\n")
+            print(tabulate(table_data, headers=["Stock", "Price", "Change", "Percent Change"]))
             print("\n")
         elif choice == 'Edit Portfolio Allocations':
             edit_allocations(filename)
