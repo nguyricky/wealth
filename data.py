@@ -1,6 +1,14 @@
 import json
 import os
+from questionary import form, text, Style as QuestionaryStyle
 from tabulate import tabulate
+import colorama
+from colorama import Fore, Style
+colorama.init()
+
+custom_style = QuestionaryStyle([
+    ('question', 'noinherit'),
+])
 
 def load_or_create_allocations(filename):
     if os.path.exists(filename):
@@ -10,22 +18,56 @@ def load_or_create_allocations(filename):
         return create_new_allocations(filename)
 
 def create_new_allocations(filename):
+        
+    print("\nPortfolio allocations file not found. Let's create a new one.")
+
     allocations = {}
     total_percentage = 0
-    print("Portfolio allocations file not found. Let's create a new one.")
-    print("Enter your portfolio allocations (enter 'done' to finish):")
+
     while total_percentage < 100:
-        stock = input("Enter stock name: ")
+        print(f"\nTotal allocated so far: {Style.BRIGHT}{Fore.GREEN}{total_percentage:.2f}%{Style.RESET_ALL}")
+
+        response = form(
+            stock = text("Enter stock name:", style = custom_style),
+            percentage = text("Enter allocation percentage:", style = custom_style)
+        ).ask()
+
+        stock = response['stock']
         if stock.lower() == 'done':
             break
-        percentage = float(input(f"Enter allocation percentage for {stock} (Total so far: {total_percentage}%): "))
-        if total_percentage + percentage > 100:
-            print(f"Error: Total allocation exceeds 100%. You can allocate up to {100 - total_percentage}% more.")
+
+        try:
+            percentage = float(response['percentage'])
+            if percentage < 0 or percentage + total_percentage > 100:
+                print("Error: Invalid allocation percentage. Please try again.")
+                continue
+            
+            if stock in allocations:
+                total_percentage -= allocations[stock]
+                percentage += allocations[stock] 
+
+            if total_percentage + percentage > 100:
+                print("Error: Total allocation exceeds 100%. Please try again.")
+                continue
+        except ValueError:
+            print("Error: Please enter a valid number.")
             continue
+
         allocations[stock] = percentage
         total_percentage += percentage
-    save_allocations(filename, allocations)
+
+    if total_percentage != 100:
+        print(f"Total allocation percentage is {total_percentage}%, which is not equal to 100%. Please start over.")
+        return create_new_allocations(filename)
+
+    with open(filename, 'w') as file:
+        json.dump(allocations, file)
+        
+    print("\n")
+
     return allocations
+
+
 
 def save_allocations(filename, allocations):
     with open(filename, 'w') as file:
