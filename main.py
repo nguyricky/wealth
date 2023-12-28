@@ -1,5 +1,5 @@
-from questionary import questionary, Style
-from data import load_or_create_allocations
+from questionary import select, Style
+from data import load_or_create_allocations, edit_allocations  # Import the edit_allocations function
 from utils import calculate_investment, fetch_stock_prices
 
 custom_style = Style([
@@ -12,14 +12,15 @@ def main_menu():
     allocations = load_or_create_allocations(filename)
 
     while True:
-        choice = questionary.select(
+        choice = select(
             "What do you want to do?",
             choices=[
                 'Calculate Investment',
                 'Fetch Portfolio Stock Prices',
+                'Edit Portfolio Allocations',
                 'Exit'
             ],
-            style = custom_style
+            style=custom_style
         ).ask()
 
         if choice == 'Calculate Investment':
@@ -35,6 +36,9 @@ def main_menu():
             for stock, price in prices.items():
                 print(f"{stock}: ${price:.2f}")
             print("\n")
+        elif choice == 'Edit Portfolio Allocations':
+            edit_allocations(filename)
+            allocations = load_or_create_allocations(filename)
         elif choice == 'Exit':
             break
 
