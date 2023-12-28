@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 
 def scrape_stock(stock_symbol):
     url = f'https://www.google.com/search?q={stock_symbol}+stock+price'
@@ -27,12 +28,17 @@ def scrape_stock(stock_symbol):
         print(f"Could not find stock price for {stock_symbol}")
         return None
 
-
+def fetch_multiple_stocks(stock_symbols):
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        results = executor.map(scrape_stock, stock_symbols)
+    return list(results)
 
 def fetch_stock_prices(allocations):
+    stock_symbols = list(allocations.keys())
+    scraped_data = fetch_multiple_stocks(stock_symbols)
+
     stock_data = {}
-    for stock in allocations.keys():
-        data = scrape_stock(stock)
+    for stock, data in zip(stock_symbols, scraped_data):
         if data:
             try:
                 stock_data[stock] = {
@@ -45,7 +51,6 @@ def fetch_stock_prices(allocations):
         else:
             stock_data[stock] = None
     return stock_data
-
 
 def calculate_investment(allocations, total_investment):
     investment_per_stock = {}
