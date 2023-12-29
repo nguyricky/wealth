@@ -3,3 +3,6 @@ portfolio_allocations.json
 
 # pycache Content
 __pycache__/
+
+# Wealth Executable
+wealth

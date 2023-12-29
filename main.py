@@ -1,6 +1,6 @@
 from questionary import select, Style
-from data import load_or_create_allocations, edit_allocations
-from utils import calculate_investment, fetch_stock_prices
+from data.portfolio_data import load_or_create_allocations, edit_allocations
+from utils.stock_info import calculate_investment, fetch_stock_prices
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
