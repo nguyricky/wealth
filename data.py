@@ -67,8 +67,6 @@ def create_new_allocations(filename):
 
     return allocations
 
-
-
 def save_allocations(filename, allocations):
     with open(filename, 'w') as file:
         json.dump(allocations, file)
@@ -112,4 +110,3 @@ def edit_allocations(filename):
                 print("Stock not found.")
 
     save_allocations(filename, allocations)
-
