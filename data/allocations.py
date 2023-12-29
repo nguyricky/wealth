@@ -23,7 +23,7 @@ def display_portfolio(allocations):
     console.print("\nPortfolio Allocations:")
     console.print(table)
     
-def rebalance_portfolio(allocations):
+def rebalance_remove(allocations):
     if not allocations or sum(allocations.values()) == 0:
         return allocations
 
@@ -39,6 +39,23 @@ def rebalance_portfolio(allocations):
         allocations[stock] = round(allocations[stock], 2)
 
     return allocations
+
+def rebalance_new(allocations, new_stock, new_percentage):
+    total_percentage = sum(allocations.values())
+    if total_percentage + new_percentage > 100:
+        reduce_percentage = total_percentage + new_percentage - 100
+        for stock in allocations:
+            allocations[stock] *= (1 - (reduce_percentage / total_percentage))
+            allocations[stock] = round(allocations[stock], 2)
+
+        # Adjust the last stock to make up for rounding difference
+        total_percentage = sum(allocations.values())
+        if total_percentage != 100.0:
+            last_stock = list(allocations.keys())[-1]
+            allocations[last_stock] += round(100.0 - total_percentage, 2)
+
+    allocations[new_stock] = new_percentage
+
 
 def load_or_create_allocations(filename):
     if os.path.exists(filename):
@@ -130,18 +147,17 @@ def edit_allocations(filename):
             break
         elif choice == "Add Stock":
             new_stock = questionary.text("Enter new stock name:").ask()
-            new_percentage = questionary.text(f"Enter allocation percentage for {new_stock}:").ask()
+            new_percentage = questionary.text(f"Enter desired portfolio percentage for {new_stock}:").ask()
+
             try:
                 new_percentage = float(new_percentage)
-                if new_percentage < 0:
-                    print("Error: Allocation percentage cannot be negative.")
+                if new_percentage <= 0 or new_percentage > 100:
+                    console.print("Error: Allocation percentage must be between 0 and 100.")
                     continue
-                if sum(allocations.values()) + new_percentage > 100:
-                    print("Error: This will exceed 100% total allocation. Try a smaller percentage.")
-                    continue
-                allocations[new_stock] = new_percentage
+
+                rebalance_new(allocations, new_stock, new_percentage)
             except ValueError:
-                print("Invalid input. Please enter a valid number.")
+                console.print("Invalid input. Please enter a valid number.")
         elif choice == "Delete Stock":
             if allocations:
                 remove_stock = questionary.select(
@@ -159,7 +175,7 @@ def edit_allocations(filename):
                     ).ask()
 
                     if rebalance_choice == "Rebalance Portfolio":
-                        allocations = rebalance_portfolio(allocations)
+                        allocations = rebalance_remove(allocations)
                         console.print("\nPortfolio rebalanced:")
                         display_portfolio(allocations)
                     elif rebalance_choice == "Done":
