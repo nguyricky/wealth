@@ -1,6 +1,6 @@
 from questionary import select, Style
 from data.portfolio_data import load_or_create_allocations, edit_allocations
-from utils.stock_info import calculate_investment, fetch_stock_prices
+from utils.fetch import calculate_investment, fetch_stock_prices
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -32,12 +32,11 @@ def main_menu():
 
             table = Table(show_header=True, header_style = "bold bright_white")
             table.add_column("Stock", style = "sky_blue1")
-            table.add_column("Investment Amount", style = "green4")
+            table.add_column("Investment Allocation", style = "green4")
 
             for stock, amount in investment_per_stock.items():
                 table.add_row(stock, f"${amount:.2f}")
 
-            console.print("\nInvestment Allocation:")
             console.print(table)
             print("\n")
         
@@ -47,7 +46,7 @@ def main_menu():
             table.add_column("Stock", style = "sky_blue1")
             table.add_column("Price", style = "green4")
             table.add_column("Change")
-            table.add_column("Percent Change", style = "bright_white")
+            table.add_column("Percent Change", style = "light_sky_blue1")
 
             for stock, data in stock_data.items():
                 if data:
@@ -60,7 +59,6 @@ def main_menu():
                     table.add_row(stock, f"${data['price']}", change_text, data['percent_change'])
                 else:
                     table.add_row(stock, "N/A", "N/A", "N/A")
-            console.print("\nCurrent Tracked Stock Prices:\n")
             console.print(table)
             print("\n")
         
