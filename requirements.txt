@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+questionary
+rich
+tabulate
+colorama
