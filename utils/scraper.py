@@ -26,3 +26,4 @@ def scrape_stock(stock_symbol):
     else:
         print(f"Could not find stock price for {stock_symbol}")
         return None
+    

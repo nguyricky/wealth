@@ -1,5 +1,5 @@
 from questionary import select, Style
-from data.portfolio_data import load_or_create_allocations, edit_allocations
+from data.allocations import load_or_create_allocations, edit_allocations
 from utils.fetch import calculate_investment, fetch_stock_prices
 from rich.console import Console
 from rich.table import Table
@@ -20,7 +20,8 @@ def main_menu():
             "What do you want to do?",
             choices=[
                 'Calculate Investment',
-                'Fetch Portfolio Stock Prices',
+                'Fetch Portfolio Prices',
+                'Edit Portfolio Allocations',
                 'Exit'
             ],
             style = custom_style
@@ -40,7 +41,7 @@ def main_menu():
             console.print(table)
             print("\n")
         
-        elif choice == 'Fetch Portfolio Stock Prices':
+        elif choice == 'Fetch Portfolio Prices':
             stock_data = fetch_stock_prices(allocations)
             table = Table(show_header=True, header_style = "bold bright_white")
             table.add_column("Stock", style = "sky_blue1")
