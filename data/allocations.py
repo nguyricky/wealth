@@ -11,6 +11,35 @@ custom_style = QuestionaryStyle([
     ('question', 'noinherit'),
 ])
 
+def display_portfolio(allocations):
+    console = Console()
+    table = Table(show_header=True, header_style="bold cyan")
+    table.add_column("Stock", justify="left")
+    table.add_column("Percentage", justify="right")
+
+    for stock, percentage in allocations.items():
+        table.add_row(stock, f"{percentage}%")
+
+    console.print("\nPortfolio Allocations:")
+    console.print(table)
+    
+def rebalance_portfolio(allocations):
+    if not allocations or sum(allocations.values()) == 0:
+        return allocations
+
+    total_percentage = sum(allocations.values())
+    remaining_percentage = 100 - total_percentage
+    number_of_stocks = len(allocations)
+
+    additional_per_stock = remaining_percentage / number_of_stocks
+    for stock in allocations:
+        allocations[stock] += additional_per_stock
+
+    for stock in allocations:
+        allocations[stock] = round(allocations[stock], 2)
+
+    return allocations
+
 def load_or_create_allocations(filename):
     if os.path.exists(filename):
         with open(filename, 'r') as file:
@@ -91,9 +120,9 @@ def edit_allocations(filename):
         choice = questionary.select(
             "What would you like to do?",
             choices=[
-                "Add stock",
-                "Delete stock",
-                "Edit stock percentage",
+                "Add Stock",
+                "Delete Stock",
+                "Edit Stock Percentage",
                 "Done"
             ]).ask()
 
@@ -114,9 +143,32 @@ def edit_allocations(filename):
             except ValueError:
                 print("Invalid input. Please enter a valid number.")
         elif choice == "Delete Stock":
-            remove_stock = questionary.select("Select a stock to remove:", choices=list(allocations.keys())).ask()
-            allocations.pop(remove_stock, None)
-        elif choice == "Edit Stock Percentage":
+            if allocations:
+                remove_stock = questionary.select(
+                    "Select a stock to remove:", 
+                    choices=list(allocations.keys())
+                ).ask()
+
+                if remove_stock and remove_stock in allocations:
+                    allocations.pop(remove_stock)
+                    console.print(f"\n{remove_stock} removed from portfolio.")
+
+                    rebalance_choice = questionary.select(
+                        "\nWould you like to rebalance your portfolio now?",
+                        choices=["Rebalance Portfolio", "Done"]
+                    ).ask()
+
+                    if rebalance_choice == "Rebalance Portfolio":
+                        allocations = rebalance_portfolio(allocations)
+                        console.print("\nPortfolio rebalanced:")
+                        display_portfolio(allocations)
+                    elif rebalance_choice == "Done":
+                        console.print("No changes made to the remaining allocations.")
+                else:
+                    console.print("Stock not found in portfolio.")
+            else:
+                console.print("No stocks available to delete.")
+        elif choice == "Edit Stock percentage":
             stock_to_edit = questionary.select("Select a stock to edit:", choices=list(allocations.keys())).ask()
             new_percentage = questionary.text(f"Enter new allocation percentage for {stock_to_edit}:").ask()
             try:
