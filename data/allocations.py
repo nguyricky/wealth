@@ -48,7 +48,6 @@ def rebalance_new(allocations, new_stock, new_percentage):
             allocations[stock] *= (1 - (reduce_percentage / total_percentage))
             allocations[stock] = round(allocations[stock], 2)
 
-        # Adjust the last stock to make up for rounding difference
         total_percentage = sum(allocations.values())
         if total_percentage != 100.0:
             last_stock = list(allocations.keys())[-1]
