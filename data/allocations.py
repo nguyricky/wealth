@@ -5,6 +5,8 @@ from rich.console import Console
 from rich.table import Table
 import colorama
 from colorama import Fore, Style
+from data.rebalance import rebalance_new, rebalance_remove
+
 colorama.init()
 
 custom_style = QuestionaryStyle([
@@ -22,39 +24,6 @@ def display_portfolio(allocations):
 
     console.print("\nPortfolio Allocations:")
     console.print(table)
-    
-def rebalance_remove(allocations):
-    if not allocations or sum(allocations.values()) == 0:
-        return allocations
-
-    total_percentage = sum(allocations.values())
-    remaining_percentage = 100 - total_percentage
-    number_of_stocks = len(allocations)
-
-    additional_per_stock = remaining_percentage / number_of_stocks
-    for stock in allocations:
-        allocations[stock] += additional_per_stock
-
-    for stock in allocations:
-        allocations[stock] = round(allocations[stock], 2)
-
-    return allocations
-
-def rebalance_new(allocations, new_stock, new_percentage):
-    total_percentage = sum(allocations.values())
-    if total_percentage + new_percentage > 100:
-        reduce_percentage = total_percentage + new_percentage - 100
-        for stock in allocations:
-            allocations[stock] *= (1 - (reduce_percentage / total_percentage))
-            allocations[stock] = round(allocations[stock], 2)
-
-        total_percentage = sum(allocations.values())
-        if total_percentage != 100.0:
-            last_stock = list(allocations.keys())[-1]
-            allocations[last_stock] += round(100.0 - total_percentage, 2)
-
-    allocations[new_stock] = new_percentage
-
 
 def load_or_create_allocations(filename):
     if os.path.exists(filename):
@@ -169,7 +138,7 @@ def edit_allocations(filename):
                     console.print(f"\n{remove_stock} removed from portfolio.")
 
                     rebalance_choice = questionary.select(
-                        "\nWould you like to rebalance your portfolio now?",
+                        "Would you like to rebalance your portfolio now?",
                         choices=["Rebalance Portfolio", "Done"]
                     ).ask()
 
@@ -183,7 +152,7 @@ def edit_allocations(filename):
                     console.print("Stock not found in portfolio.")
             else:
                 console.print("No stocks available to delete.")
-        elif choice == "Edit Stock percentage":
+        elif choice == "Edit Stock Percentage":
             stock_to_edit = questionary.select("Select a stock to edit:", choices=list(allocations.keys())).ask()
             new_percentage = questionary.text(f"Enter new allocation percentage for {stock_to_edit}:").ask()
             try:
