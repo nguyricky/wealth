@@ -8,10 +8,19 @@ from colorama import Fore, Style
 from data.rebalance import rebalance_new, rebalance_remove
 
 colorama.init()
+previous_allocations = None
 
 custom_style = QuestionaryStyle([
     ('question', 'noinherit'),
 ])
+
+def get_previous_allocations():
+    global previous_allocations
+    return previous_allocations
+
+def set_previous_allocations(allocations):
+    global previous_allocations
+    previous_allocations = allocations
 
 def display_portfolio(allocations):
     console = Console()
@@ -88,6 +97,7 @@ def save_allocations(filename, allocations):
 
 def edit_allocations(filename):
     allocations = load_or_create_allocations(filename)
+    set_previous_allocations(allocations.copy())
     console = Console()
 
     while True:
