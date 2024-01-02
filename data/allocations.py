@@ -24,15 +24,16 @@ def set_previous_allocations(allocations):
 
 def display_portfolio(allocations):
     console = Console()
-    table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("Stock", justify="left")
-    table.add_column("Percentage", justify="right")
+    table = Table(show_header=True, header_style = "bold cyan")
+    table.add_column("Stock",  style = "sky_blue1", justify = "left")
+    table.add_column("Percentage", style = "green4", justify = "right")
 
     for stock, percentage in allocations.items():
         table.add_row(stock, f"{percentage}%")
 
     console.print("\nPortfolio Allocations:")
     console.print(table)
+    print("\n")
 
 def load_or_create_allocations(filename):
     if os.path.exists(filename):
