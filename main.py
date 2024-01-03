@@ -23,9 +23,9 @@ def main_menu():
             choices=[
                 'Calculate Investment',
                 'Fetch Portfolio Prices',
-                'View Current Portfolio Allocations',
                 'Edit Portfolio Allocations',
                 'Revert to Previous Allocations',
+                'View Current Portfolio Allocations',
                 'Exit'
             ],
             style = custom_style
