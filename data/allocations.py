@@ -1,26 +1,18 @@
 import json
 import os
+import colorama
 from questionary import form, text, Style as QuestionaryStyle, questionary
 from rich.console import Console
 from rich.table import Table
-import colorama
 from colorama import Fore, Style
 from data.rebalance import rebalance_new, rebalance_remove
+from data.cache import revert_allocations, set_previous_allocations, save_allocations
 
 colorama.init()
-previous_allocations = None
 
 custom_style = QuestionaryStyle([
     ('question', 'noinherit'),
 ])
-
-def get_previous_allocations():
-    global previous_allocations
-    return previous_allocations
-
-def set_previous_allocations(allocations):
-    global previous_allocations
-    previous_allocations = allocations
 
 def display_portfolio(allocations):
     console = Console()
@@ -92,10 +84,6 @@ def create_new_allocations(filename):
 
     return allocations
 
-def save_allocations(filename, allocations):
-    with open(filename, 'w') as file:
-        json.dump(allocations, file)
-
 def edit_allocations(filename):
     allocations = load_or_create_allocations(filename)
     set_previous_allocations(allocations.copy())
@@ -119,11 +107,13 @@ def edit_allocations(filename):
                 "Add Stock",
                 "Delete Stock",
                 "Edit Stock Percentage",
+                'Revert to Previous Allocations',
                 "Done"
             ]).ask()
 
         if choice == "Done":
             break
+        
         elif choice == "Add Stock":
             new_stock = questionary.text("Enter new stock name:").ask()
             new_percentage = questionary.text(f"Enter desired portfolio percentage for {new_stock}:").ask()
@@ -137,6 +127,7 @@ def edit_allocations(filename):
                 rebalance_new(allocations, new_stock, new_percentage)
             except ValueError:
                 console.print("Invalid input. Please enter a valid number.")
+                
         elif choice == "Delete Stock":
             if allocations:
                 remove_stock = questionary.select(
@@ -163,6 +154,7 @@ def edit_allocations(filename):
                     console.print("Stock not found in portfolio.")
             else:
                 console.print("No stocks available to delete.")
+                
         elif choice == "Edit Stock Percentage":
             stock_to_edit = questionary.select("Select a stock to edit:", choices=list(allocations.keys())).ask()
             new_percentage = questionary.text(f"Enter new allocation percentage for {stock_to_edit}:").ask()
@@ -178,5 +170,9 @@ def edit_allocations(filename):
                 allocations[stock_to_edit] = new_percentage
             except ValueError:
                 print("Invalid input. Please enter a valid number.")
+                
+        elif choice == 'Revert to Previous Allocations':
+            revert_allocations(filename)
+            allocations = load_or_create_allocations(filename)
 
     save_allocations(filename, allocations)

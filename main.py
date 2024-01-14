@@ -1,6 +1,5 @@
 from questionary import select, Style
 from data.allocations import load_or_create_allocations, edit_allocations, display_portfolio
-from data.cache import revert_allocations
 from utils.fetch import calculate_investment, fetch_stock_prices
 from rich.console import Console
 from rich.table import Table
@@ -24,7 +23,6 @@ def main_menu():
                 'Calculate Investment',
                 'Fetch Portfolio Prices',
                 'Edit Portfolio Allocations',
-                'Revert to Previous Allocations',
                 'View Current Portfolio Allocations',
                 'Exit'
             ],
@@ -70,9 +68,6 @@ def main_menu():
         elif choice == 'Edit Portfolio Allocations':
             edit_allocations(filename)
             allocations = load_or_create_allocations(filename)
-            
-        elif choice == 'Revert to Previous Allocations':
-            revert_allocations(filename)
         
         elif choice == 'View Current Portfolio Allocations':
             display_portfolio(allocations)
