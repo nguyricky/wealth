@@ -4,3 +4,4 @@ questionary
 rich
 tabulate
 colorama
+pandas

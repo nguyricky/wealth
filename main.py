@@ -1,6 +1,7 @@
 from questionary import select, Style
 from data.allocations import load_or_create_allocations, edit_allocations, display_portfolio
 from utils.fetch import calculate_investment, fetch_stock_prices
+from utils.csv import display_csv_as_table
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -23,6 +24,7 @@ def main_menu():
                 'Calculate Investment',
                 'Fetch Portfolio Prices',
                 'Edit Portfolio Allocations',
+                'View Portfolio via CSV',
                 'View Current Portfolio Allocations',
                 'Exit'
             ],
@@ -68,6 +70,10 @@ def main_menu():
         elif choice == 'Edit Portfolio Allocations':
             edit_allocations(filename)
             allocations = load_or_create_allocations(filename)
+                 
+        elif choice == 'View Portfolio via CSV':
+            csv_file_path = input("Enter the path to your CSV file: ")
+            display_csv_as_table(csv_file_path)
         
         elif choice == 'View Current Portfolio Allocations':
             display_portfolio(allocations)
