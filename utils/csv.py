@@ -9,7 +9,7 @@ def display_csv_as_table(file_path):
         print(f"Error reading file: {e}")
         return
 
-    table = Table(show_header=True, header_style="bold magenta")
+    table = Table(show_header=True, header_style="bold bright_white")
     for column in df.columns:
         table.add_column(str(column))
 

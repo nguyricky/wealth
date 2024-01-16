@@ -5,6 +5,8 @@ from utils.csv import display_csv_as_table
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+from tkinter import filedialog
+import tkinter as tk
 
 custom_style = Style([
     ('qmark', ''),
@@ -72,8 +74,20 @@ def main_menu():
             allocations = load_or_create_allocations(filename)
                  
         elif choice == 'View Portfolio via CSV':
-            csv_file_path = input("Enter the path to your CSV file: ")
-            display_csv_as_table(csv_file_path)
+            root = tk.Tk()
+            root.withdraw()
+            csv_file_path = filedialog.askopenfilename(
+                title="Select CSV File",
+                filetypes=(("CSV files", "*.csv"), ("All files", "*.*"))
+            )
+            root.destroy()
+
+            if csv_file_path:
+                display_csv_as_table(csv_file_path)
+            else:
+                print("No file selected.")
+                
+            print("\n")
         
         elif choice == 'View Current Portfolio Allocations':
             display_portfolio(allocations)
