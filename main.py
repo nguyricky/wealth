@@ -1,6 +1,7 @@
 from questionary import select, Style
 from data.allocations import load_or_create_allocations, edit_allocations, display_portfolio
-from utils.fetch import calculate_investment, fetch_stock_prices
+from utils.fetch import fetch_stock_prices
+from utils.calculations import calculate_investment
 from utils.csv import display_csv_as_table
 from rich.console import Console
 from rich.table import Table
